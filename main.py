@@ -6,8 +6,9 @@ to write the newest index_price to the database / memory.
 from calculator import Calculator
 def main():
 	calculator = Calculator()
-	print(calculator.calculate())
+	print("main")	
+	print(calculator.calculate().price)
 
 
 if __name__ == '__main__':
-    main()
+   main()
