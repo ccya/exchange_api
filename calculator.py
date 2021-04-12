@@ -14,19 +14,14 @@ import statistics
 
 class Calculator():
 	def __init__(self):
-		self.parsers = [
-		# OkParser(),
-		# BinanceParser(),
-		HuobiParser()
-		]
+		self.parsers = [BinanceParser(), OkParser(), HuobiParser()]
 		self.spot_prices = []
 		self.last_sigma = None
 		self.last_mean = None
 		# past prices used to filter noise. ordered by time desc.
 		self.past_price = [] 
 
-	def fetchSpotPrice(self):
-		loop = asyncio.get_event_loop()
+	def fetchSpotPrice(self, loop):
 		for parser in self.parsers:
 			self.spot_prices.append(loop.run_until_complete(parser.run()))
 
@@ -39,7 +34,6 @@ class Calculator():
 			database=configs.DATABASE);
 		mycursor = mydb.cursor(dictionary = True)
 		query_str= "SELECT index_price, sigma, mean from index_price where timestamp BETWEEN NOW() and NOW() - INTERVAL 5 MINUTE order by timestamp desc"
-		# value = (datetime.datetime.now() - datetime.timedelta(minutes=5))
 		mycursor.execute(query_str)
 		result = mycursor.fetchall()
 		for row in result:
@@ -82,15 +76,14 @@ class Calculator():
 				current_mean = statistics.mean(self.past_price+[current_price])
 				return(current_price, current_sigma, current_mean)
 
+
 	def calculate(self):
 		current_price = 0
 		for price in self.spot_prices:
 			current_price += price.price
 		current_price = (current_price*1.0000)/len(self.spot_prices)
 		index, sigma, mean = self.filter(current_price)
-		print(index)
-		print(sigma)
-		print(mean)
+		print(index, sigma, mean)
 		return (index, sigma, mean)
 
 	def saveToDb(self, result):

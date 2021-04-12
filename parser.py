@@ -6,6 +6,8 @@ Define the interface for an exchange. This will be extended if new exchange get 
 from abc import ABC, abstractmethod
 import asyncio
 import websockets
+import time
+
 
 class Parser(ABC):
 	@abstractmethod

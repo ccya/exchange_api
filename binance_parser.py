@@ -18,5 +18,6 @@ class BinanceParser(Parser):
 		print(response)
 		if ('c' not in response):
 			return None
-		return SpotPrice("BINANCE",response['E'],"BTC-USDT",float(response['c']))
+		result = SpotPrice("BINANCE",response['E'],"BTC-USDT",float(response['c']))
+		return result
 
