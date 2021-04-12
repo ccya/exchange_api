@@ -38,7 +38,7 @@ class Calculator():
 			mydb.close()
 			return
 		mydb.close()
-		self.last_price = result['price']
+		self.last_price = result['index_price']
 		self.last_sigma = result['sigma']
 
 
@@ -48,7 +48,7 @@ class Calculator():
 			return(current_price, 1.1)
 		# If current_price is in of 3 sigma based on last_price,
 		# store the price, calculate the sigma of last 5 min price and store it.
-		if current_price in range(self.last_price - 3 * self.last_sigma,self.last_price + 3 * self.last_sigma):
+		if current_price >= self.last_price - 3 * self.last_sigma and current_price <= self.last_price + 3 * self.last_sigma:
 			print("TODO CALCULATE SIGMA")
 			return(current_price, 1.1)
 		else:
@@ -56,7 +56,7 @@ class Calculator():
 			# Use those data in range to calculate current_price and new sigma
 			valid_count = 0
 			for spot in self.spot_prices:
-				if spot.price in range(self.last_price - 3 * self.last_sigma,self.last_price + 3 * self.last_sigma):
+				if spot.price >= self.last_price - 3 * self.last_sigma and spot.price <= self.last_price + 3 * self.last_sigma:
 					valid_count +=1
 			if valid_count >= len(self.spot_prices)/2+1:
 				print("TODO NOISE DATA")
