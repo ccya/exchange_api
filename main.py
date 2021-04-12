@@ -20,13 +20,18 @@ def createDB():
 							id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
 							timestamp TIMESTAMP, 
 							index_price FLOAT(20,7),
-							sigma FLOAT(10,7));""")
+							mean FLOAT(10,3),
+							sigma FLOAT(10,3));""")
 
 def main():
 	# TODO: For every 5 second, do a calculation
 	print("TODO: THE 5 SECOND THING")
-	calculator = Calculator()	
-	calculator.calculate()
+	calculator = Calculator()
+	calculator.fetchSpotPrice();
+	calculator.fetchPrevious()	
+	result = calculator.calculate()
+	calculator.saveToDb(result[0], result[1])
+
 	
 
 if __name__ == '__main__':
