@@ -27,7 +27,7 @@ def main():
 	print("TODO: THE 5 SECOND THING")
 	calculator = Calculator()	
 	calculator.calculate()
-
+	
 
 if __name__ == '__main__':
 	createDB()

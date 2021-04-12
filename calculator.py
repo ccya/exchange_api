@@ -90,6 +90,7 @@ class Calculator():
 		sql_str = "INSERT INTO index_price (timestamp, index_price, sigma) VALUES (%s, %s, %s)"
 		val = (datetime.now() , price, sigma)
 		mycursor.execute(sql_str, val)
+		mydb.commit()
 		mydb.close()
 
 
