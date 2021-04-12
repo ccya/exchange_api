@@ -26,7 +26,8 @@ class Parser(ABC):
 		url = self.getUrl()
 		response_byte = ""
 		ws = await websockets.connect(url)
-		await ws.send(request_str)
+		if request_str is not None:
+			await ws.send(request_str)
 		while True:
 			try:
 				response_byte = await ws.recv()

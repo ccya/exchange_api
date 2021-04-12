@@ -8,12 +8,16 @@ import configs
 import datetime
 import mysql.connector
 from ok_parser import OkParser
+from binance_parser import BinanceParser
+from huobi_parser import HuobiParser
 import statistics
 
 class Calculator():
 	def __init__(self):
-		self.parsers = [OkParser()
-		# ,BinanceParser(), HuobiParser()
+		self.parsers = [
+		# OkParser(),
+		# BinanceParser(),
+		HuobiParser()
 		]
 		self.spot_prices = []
 		self.last_sigma = None
@@ -89,7 +93,7 @@ class Calculator():
 		print(mean)
 		return (index, sigma, mean)
 
-	def saveToDb(self, price, sigma, mean):
+	def saveToDb(self, result):
 		mydb = mysql.connector.connect(
 			host = "localhost",
 			user = "root",
@@ -98,7 +102,7 @@ class Calculator():
 			database="exchange_api");
 		mycursor = mydb.cursor()
 		sql_str = "INSERT INTO index_price (timestamp, index_price, sigma, mean) VALUES (%s, %s, %s, %s)"
-		val = (datetime.datetime.now() , price, sigma, mean)
+		val = (datetime.datetime.now() , result[0], result[1], result[2])
 		mycursor.execute(sql_str, val)
 		mydb.commit()
 		mydb.close()

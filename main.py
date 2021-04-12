@@ -7,7 +7,7 @@ from calculator import Calculator
 import configs
 import mysql.connector
 
-def createDB():
+def setupDB():
 	mydb = mysql.connector.connect(
 		host = configs.HOST,
 		user = configs.USER,
@@ -23,17 +23,20 @@ def createDB():
 							mean FLOAT(10,3),
 							sigma FLOAT(10,3));""")
 
-def main():
+def calcuateIndex():
 	# TODO: For every 5 second, do a calculation
 	print("TODO: THE 5 SECOND THING")
 	calculator = Calculator()
 	calculator.fetchSpotPrice();
 	calculator.fetchPrevious()	
 	result = calculator.calculate()
-	calculator.saveToDb(result[0], result[1])
+	calculator.saveToDb(result)
 
-	
+# def handleReq():
+
 
 if __name__ == '__main__':
-	createDB()
-	main()
+	setupDB()
+	calcuateIndex()
+	print("TODO the threading thing")
+	# handleReq()
