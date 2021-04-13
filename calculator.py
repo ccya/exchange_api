@@ -85,7 +85,7 @@ class Calculator():
 		if not self.test_mode:
 			for parser in self.parsers:
 				if parser.spot_price is None:
-					print("[Calculator] No result fetched from Websocket yet")
+					# print("[Calculator]Warning: No result fetched from Websocket yet")
 					return None
 			self.spot_prices = [x.spot_price.price for x in self.parsers]
 		current_price = (sum(self.spot_prices)*1.0000)/len(self.parsers)
@@ -113,7 +113,7 @@ class Calculator():
 				parser.close()
 			loop.close()
 		else:
-			print("[Calculator] No running loop to close")
+			print("[Calculator]Warning: No running loop to close")
 
 
 
