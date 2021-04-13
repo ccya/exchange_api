@@ -37,16 +37,16 @@ class Calculator():
 			auth_plugin='mysql_native_password',
 			database=configs.DATABASE);
 		mycursor = mydb.cursor(dictionary = True)
-		query_str= "SELECT index_price, sigma, mean from index_price where timestamp BETWEEN NOW() and NOW() - INTERVAL 5 MINUTE order by timestamp desc"
+		query_str= "SELECT index_price, sigma, mean from index_price where timestamp >= DATE_SUB(NOW(), INTERVAL 5 MINUTE) order by timestamp desc;"
 		mycursor.execute(query_str)
 		result = mycursor.fetchall()
+		if result is None or len(result) == 0:
+			mydb.close()
+			return
+		self.last_sigma = result[0]['sigma']
+		self.last_mean = result[0]['mean']
 		for row in result:
-			if result is None:
-				mydb.close()
-				return
-			self.past_price.append(result['index_price'])
-			self.last_sigma = result['sigma']
-			self.last_mean = result['mean']
+			self.past_price.append(row['index_price'])
 		mydb.close()
 
 	def filter(self, current_price):
@@ -59,7 +59,7 @@ class Calculator():
 			current_mean = statistics.mean(self.past_price+[current_price])
 			return(current_price, current_sigma, current_mean)
 		else:
-			# check if majority of original data is inside the 3 sigma range, if so consider there are bad data.
+			# check if majority of original data is outside the 3 sigma range, if so consider there are bad data.
 			# Use those data in range to calculate current_price and new sigma
 			valid_count = 0
 			in_range_price = []

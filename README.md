@@ -11,6 +11,7 @@
 1. 请确认本地已安装 mysql, python3, websocket.
 2. 数据库设置在`configs.py` 文件。只需要改动`PASSWORD`的值，保证程序能以`root@localhost`连接mysql.
 3. 直接启动 `main.py`， 然后打开 `http://localhost:8080/index_price` 即可看到结果。
+4. `CTRL+C` 退出程序
 
 ## Index 计算方式
 1. 首先从交易所获得现货价格`spot_price`,其中`spot_price` = 所有交易所现货价格的平均值。

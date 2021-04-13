@@ -40,7 +40,6 @@ class Parser(ABC):
 			try:
 				response_byte = await self.ws.recv()
 				spot_price = self.convertResponse(response_byte)
-				# print(spot_price)
 				if spot_price is not None: 
 					self.spot_price = spot_price
 				# continue wait for a valid message
@@ -51,7 +50,7 @@ class Parser(ABC):
 					 # continue waiting for the response if pinged successfully
 					continue
 				except Exception as e:
-					print("[Parser] error in receiving msg")
+					print("[Parser] Warning: error in receiving msg")
 					self.connected = False
 					# if ping failed, stop waiting for the message for this connection
 					break
