@@ -14,8 +14,8 @@ class BinanceParser(Parser):
 
 	# override function
 	def convertResponse(self, message):
+		# print("binance " + message)
 		response = eval(message)
-		print(response)
 		if ('c' not in response):
 			return None
 		result = SpotPrice("BINANCE",response['E'],"BTC-USDT",float(response['c']))

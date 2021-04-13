@@ -15,15 +15,18 @@ import statistics
 class Calculator():
 	def __init__(self):
 		self.parsers = [BinanceParser(), OkParser(), HuobiParser()]
-		self.spot_prices = []
 		self.last_sigma = None
 		self.last_mean = None
+		self.spot_prices = None
 		# past prices used to filter noise. ordered by time desc.
 		self.past_price = [] 
 
+# Put result in parser field, not as return type. So that connection can be remain open
 	def fetchSpotPrice(self, loop):
+		asyncio.set_event_loop(loop)
 		for parser in self.parsers:
-			self.spot_prices.append(loop.run_until_complete(parser.run()))
+			asyncio.ensure_future(parser.run())
+		loop.run_forever()
 
 	def fetchPrevious(self):
 		mydb = mysql.connector.connect(
@@ -44,7 +47,6 @@ class Calculator():
 			self.last_sigma = result['sigma']
 			self.last_mean = result['mean']
 		mydb.close()
-
 
 	def filter(self, current_price):
 		if (len(self.past_price) == 0) and self.last_sigma is None and self.last_mean is None:
@@ -76,14 +78,20 @@ class Calculator():
 				current_mean = statistics.mean(self.past_price+[current_price])
 				return(current_price, current_sigma, current_mean)
 
-
 	def calculate(self):
+		self.fetchPrevious()
 		current_price = 0
-		for price in self.spot_prices:
-			current_price += price.price
-		current_price = (current_price*1.0000)/len(self.spot_prices)
+		for parser in self.parsers:
+			if parser.spot_price is None:
+				print("[Calculator] No result fetched from Websocket yet")
+				return None
+			current_price += parser.spot_price.price
+		self.spot_prices = [x.spot_price for x in self.parsers]
+		current_price = (current_price*1.0000)/len(self.parsers)
 		index, sigma, mean = self.filter(current_price)
+		print("=================\n")
 		print(index, sigma, mean)
+		print("=================\n")
 		return (index, sigma, mean)
 
 	def saveToDb(self, result):
@@ -99,6 +107,14 @@ class Calculator():
 		mycursor.execute(sql_str, val)
 		mydb.commit()
 		mydb.close()
+
+	def close(self, loop):
+		if loop.is_running():
+			for parser in self.parsers:
+				parser.close()
+			loop.close()
+		else:
+			print("[Calculator] No running loop to close")
 
 
 

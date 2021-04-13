@@ -30,19 +30,19 @@ def setupDB():
 							mean FLOAT(10,3),
 							sigma FLOAT(10,3));""")
 
-def calcuateIndex(loop):
+def fetchIndex(calculator, loop):
+	calculator.fetchSpotPrice(loop);
+
+def calculateIndex(calculator):
 	while True:
 		try:
-			calculator = Calculator()
-			calculator.fetchSpotPrice(loop);
-			calculator.fetchPrevious()	
 			result = calculator.calculate()
-			calculator.saveToDb(result)
-			time.sleep(20)
+			if result is not None:
+				calculator.saveToDb(result)
+			time.sleep(5)
 		except KeyboardInterrupt:
+			calculator.close(loop)
 			break
-
-
 
 class MarketServer(BaseHTTPRequestHandler):
 	def do_GET(self):
@@ -84,8 +84,11 @@ def startServer():
 if __name__ == '__main__':
 	setupDB()
 	loop = asyncio.new_event_loop()
-	T1 = Thread(target=calcuateIndex, args=(loop,))
-	T2 = Thread(target=startServer, args=())
+	calculator = Calculator()
+	T1 = Thread(target=startServer, args=())
 	T1.start()
+	T2 = Thread(target=fetchIndex, args=(calculator, loop, ))
 	T2.start()
+	T3 = Thread(target=calculateIndex, args=(calculator, ))
+	T3.start()
 

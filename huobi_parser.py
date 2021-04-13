@@ -17,7 +17,7 @@ class HuobiParser(Parser):
 	# override function
 	def convertResponse(self, message):
 		response_str = gzip.decompress(message).decode()
-		print("resp: " + response_str)
+		# print("huobi resp: " + response_str)
 		response = eval(response_str)
 		if ('tick' not in response):
 			return None

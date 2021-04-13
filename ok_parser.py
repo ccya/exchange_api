@@ -22,7 +22,7 @@ class OkParser(Parser):
 	# override function
 	def convertResponse(self, message):
 		response_str = self.inflate(message).decode('utf-8')
-		print("resp: " + response_str)
+		# print("ok resp: " + response_str)
 		response = eval(response_str)
 		if ('data' not in response):
 			return None
