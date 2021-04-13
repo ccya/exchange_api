@@ -7,9 +7,9 @@ import asyncio
 import configs
 import datetime
 import mysql.connector
-from ok_parser import OkParser
-from binance_parser import BinanceParser
-from huobi_parser import HuobiParser
+from parser_ok import OkParser
+from parser_binance import BinanceParser
+from parser_huobi import HuobiParser
 import statistics
 
 class Calculator():
