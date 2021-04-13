@@ -20,6 +20,7 @@ class Calculator():
 		self.spot_prices = None
 		# past prices used to filter noise. ordered by time desc.
 		self.past_price = [] 
+		self.test_mode = False
 
 # Put result in parser field, not as return type. So that connection can be remain open
 	def fetchSpotPrice(self, loop):
@@ -63,9 +64,9 @@ class Calculator():
 			valid_count = 0
 			in_range_price = []
 			for spot in self.spot_prices:
-				if spot.price >= self.last_mean - 3 * self.last_sigma and spot.price <= self.last_mean + 3 * self.last_sigma:
+				if spot >= self.last_mean - 3 * self.last_sigma and spot <= self.last_mean + 3 * self.last_sigma:
 					valid_count +=1
-					in_range_price.append(spot.price)
+					in_range_price.append(spot)
 			if valid_count >= (len(self.spot_prices)/2):
 				current_price = (sum(in_range_price)*1.0000)/len(in_range_price)
 				current_sigma = statistics.pstdev(self.past_price+[current_price])
@@ -79,19 +80,17 @@ class Calculator():
 				return(current_price, current_sigma, current_mean)
 
 	def calculate(self):
-		self.fetchPrevious()
 		current_price = 0
-		for parser in self.parsers:
-			if parser.spot_price is None:
-				print("[Calculator] No result fetched from Websocket yet")
-				return None
-			current_price += parser.spot_price.price
-		self.spot_prices = [x.spot_price for x in self.parsers]
-		current_price = (current_price*1.0000)/len(self.parsers)
+		# read data from parser. If test mode, these data will be prepared.
+		if not self.test_mode:
+			for parser in self.parsers:
+				if parser.spot_price is None:
+					print("[Calculator] No result fetched from Websocket yet")
+					return None
+			self.spot_prices = [x.spot_price.price for x in self.parsers]
+		current_price = (sum(self.spot_prices)*1.0000)/len(self.parsers)
+
 		index, sigma, mean = self.filter(current_price)
-		print("=================\n")
-		print(index, sigma, mean)
-		print("=================\n")
 		return (index, sigma, mean)
 
 	def saveToDb(self, result):

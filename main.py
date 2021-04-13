@@ -36,6 +36,7 @@ def fetchIndex(calculator, loop):
 def calculateIndex(calculator):
 	while True:
 		try:
+			calculator.fetchPrevious()
 			result = calculator.calculate()
 			if result is not None:
 				calculator.saveToDb(result)

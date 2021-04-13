@@ -1,7 +1,7 @@
+import gzip
 import json
 from parser import Parser
 from spot_price import SpotPrice
-import gzip
 
 class HuobiParser(Parser):
 
