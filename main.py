@@ -5,12 +5,12 @@ to write the newest index_price to the database / memory.
 """
 import asyncio
 from calculator import Calculator
-from threading import Thread
 import configs
-import mysql.connector
+from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-from datetime import datetime
+import mysql.connector
+from threading import Thread
 import time
 
 
