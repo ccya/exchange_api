@@ -21,7 +21,8 @@ def setupDB():
 		timestamp TIMESTAMP, 
 		index_price FLOAT(20,7),
 		mean FLOAT(10,3),
-		sigma FLOAT(10,3));"""]
+		sigma FLOAT(10,3),
+		valid boolean);"""]
 	dbHelper.create(sql_strs)
 
 def calculateIndex(calculator):

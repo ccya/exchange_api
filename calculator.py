@@ -42,33 +42,17 @@ class Calculator():
 
 	def filter(self, current_price):
 		if (len(self.past_price) == 0) and self.last_sigma is None and self.last_mean is None:
-			return(current_price, 0.0, current_price)
+			return(current_price, 0.0, current_price, True)
+		current_sigma = statistics.pstdev(self.past_price+[current_price])
+		current_mean = statistics.mean(self.past_price+[current_price])
 		# If current_price is in of 3 sigma based on past_price,
-		# store the price, calculate the sigma of last 5 min price and store it.
+		# store the price as valid.
 		if current_price >= self.last_mean - 3 * self.last_sigma and current_price <= self.last_mean + 3 * self.last_sigma:
-			current_sigma = statistics.pstdev(self.past_price+[current_price])
-			current_mean = statistics.mean(self.past_price+[current_price])
-			return(current_price, current_sigma, current_mean)
+			return(current_price, current_sigma, current_mean, True)
 		else:
-			# check if majority of original data is outside the 3 sigma range, if so consider there are bad data.
-			# Use those data in range to calculate current_price and new sigma
-			valid_count = 0
-			in_range_price = []
-			for spot in self.spot_prices:
-				if spot >= self.last_mean - 3 * self.last_sigma and spot <= self.last_mean + 3 * self.last_sigma:
-					valid_count +=1
-					in_range_price.append(spot)
-			if valid_count >= (len(self.spot_prices)/2):
-				current_price = (sum(in_range_price)*1.0000)/len(in_range_price)
-				current_sigma = statistics.pstdev(self.past_price+[current_price])
-				current_mean = statistics.mean(self.past_price+[current_price])
-				return(current_price, current_sigma, current_mean)
-			else:
-				# If majority data is outside the 3 sigma range, consider there is a huge price change.
-				# store the price and sigma
-				current_sigma = statistics.pstdev(self.past_price+[current_price])
-				current_mean = statistics.mean(self.past_price+[current_price])
-				return(current_price, current_sigma, current_mean)
+			# if current price is out 3 sigma (the sigma for past 5 minutes price) range, 
+			# do not return it, only record the price and the new sigma.
+			return (current_price, current_sigma, current_mean, False)
 
 	def calculate(self):
 		current_price = 0
@@ -86,12 +70,12 @@ class Calculator():
 					self.spot_prices.append((parser.spot_price.price)*1.0000 * parser.getWeight())
 
 		current_price = sum(self.spot_prices)
-		index, sigma, mean = self.filter(current_price)
-		return (index, sigma, mean)
+		index, sigma, mean, valid = self.filter(current_price)
+		return (index, sigma, mean, valid)
 
 	def saveToDb(self, result):
-		sql_str = "INSERT INTO index_price (timestamp, index_price, sigma, mean) VALUES (%s, %s, %s, %s)"
-		val = (datetime.datetime.now() , result[0], result[1], result[2])
+		sql_str = "INSERT INTO index_price (timestamp, index_price, sigma, mean, valid) VALUES (%s, %s, %s, %s, %s)"
+		val = (datetime.datetime.now() , result[0], result[1], result[2], result[3])
 		self.dbHelper.mutate(sql_str, val)
 
 
