@@ -1,6 +1,8 @@
+import configs
 import json
 from parser import Parser
 from spot_price import SpotPrice
+
 
 class BinanceParser(Parser):
 
@@ -11,6 +13,12 @@ class BinanceParser(Parser):
 	# override function
 	def convertRequest(self):
 		return None
+
+	def getWeight(self):
+		if configs.WEIGHT_STRATEGY == "equal":
+			return None
+		else:
+			return configs.WEIGHTS["binance"]
 
 	# override function
 	def convertResponse(self, message):

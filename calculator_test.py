@@ -14,7 +14,7 @@ class CalculatorTest(unittest.TestCase):
         Latest sigma: 150
         """
         c = Calculator()
-        c.test_mode = True
+        c.prod_mode = False
         c.spot_prices = [50000, 50001, 50002]
         c.last_sigma = 150
         c.last_mean = 49000
@@ -33,7 +33,7 @@ class CalculatorTest(unittest.TestCase):
         Latest sigma: 150
         """
         c = Calculator()
-        c.test_mode = True
+        c.prod_mode = False
         c.spot_prices = [49300, 49200, 49100]
         c.last_sigma = 150
         c.last_mean = 49000
@@ -54,7 +54,7 @@ class CalculatorTest(unittest.TestCase):
         Latest sigma: 150
         """
         c = Calculator()
-        c.test_mode = True
+        c.prod_mode = False
         c.spot_prices = [49100, 49200, 51100]
         c.last_sigma = 150
         c.last_mean = 49000

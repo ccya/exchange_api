@@ -6,7 +6,7 @@ The result will be saved to database / memory
 import asyncio
 import configs
 import datetime
-import mysql.connector
+from database import DbHelper
 from parser_binance import BinanceParser
 from parser_huobi import HuobiParser
 from parser_ok import OkParser
@@ -20,7 +20,8 @@ class Calculator():
 		self.spot_prices = None
 		# past prices used to filter noise. ordered by time desc.
 		self.past_price = [] 
-		self.test_mode = False
+		self.prod_mode = True
+		self.dbHelper = DbHelper()
 
 # Put result in parser field, not as return type. So that connection can be remain open
 	def fetchSpotPrice(self, loop):
@@ -30,24 +31,14 @@ class Calculator():
 		loop.run_forever()
 
 	def fetchPrevious(self):
-		mydb = mysql.connector.connect(
-			host = configs.HOST,
-			user = configs.USER,
-			password = configs.PASSWORD,
-			auth_plugin='mysql_native_password',
-			database=configs.DATABASE);
-		mycursor = mydb.cursor(dictionary = True)
 		query_str= "SELECT index_price, sigma, mean from index_price where timestamp >= DATE_SUB(NOW(), INTERVAL 5 MINUTE) order by timestamp desc;"
-		mycursor.execute(query_str)
-		result = mycursor.fetchall()
+		result = self.dbHelper.fetch(query_str)
 		if result is None or len(result) == 0:
-			mydb.close()
 			return
 		self.last_sigma = result[0]['sigma']
 		self.last_mean = result[0]['mean']
 		for row in result:
 			self.past_price.append(row['index_price'])
-		mydb.close()
 
 	def filter(self, current_price):
 		if (len(self.past_price) == 0) and self.last_sigma is None and self.last_mean is None:
@@ -81,31 +72,28 @@ class Calculator():
 
 	def calculate(self):
 		current_price = 0
-		# read data from parser. If test mode, these data will be prepared.
-		if not self.test_mode:
+		# read data from parser. If test mode, the spot_price will be prepared.
+		if self.prod_mode:
+			self.spot_prices = []
 			for parser in self.parsers:
 				if parser.spot_price is None:
 					# print("[Calculator]Warning: No result fetched from Websocket yet")
 					return None
-			self.spot_prices = [x.spot_price.price for x in self.parsers]
-		current_price = (sum(self.spot_prices)*1.0000)/len(self.parsers)
+				if parser.getWeight() is None:
+					# if no special weight returned, means this is "equal weight stragety"
+					self.spot_prices.append((parser.spot_price.price)*1.0000/len(self.parsers))
+				else:
+					self.spot_prices.append((parser.spot_price.price)*1.0000 * parser.getWeight())
 
+		current_price = sum(self.spot_prices)
 		index, sigma, mean = self.filter(current_price)
 		return (index, sigma, mean)
 
 	def saveToDb(self, result):
-		mydb = mysql.connector.connect(
-			host = "localhost",
-			user = "root",
-			password = "password",
-			auth_plugin='mysql_native_password',
-			database="exchange_api");
-		mycursor = mydb.cursor()
 		sql_str = "INSERT INTO index_price (timestamp, index_price, sigma, mean) VALUES (%s, %s, %s, %s)"
 		val = (datetime.datetime.now() , result[0], result[1], result[2])
-		mycursor.execute(sql_str, val)
-		mydb.commit()
-		mydb.close()
+		self.dbHelper.mutate(sql_str, val)
+
 
 	def close(self, loop):
 		if loop.is_running():

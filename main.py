@@ -6,28 +6,23 @@ to write the newest index_price to the database / memory.
 import asyncio
 from calculator import Calculator
 import configs
+from database import DbHelper
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import mysql.connector
 from server import MarketServer
 from threading import Thread
 import time
 
 
 def setupDB():
-	mydb = mysql.connector.connect(
-		host = configs.HOST,
-		user = configs.USER,
-		password = configs.PASSWORD,
-		auth_plugin='mysql_native_password')
-	mycursor = mydb.cursor()
-	mycursor.execute("CREATE DATABASE IF NOT EXISTS exchange_api;")
-	mycursor.execute("USE exchange_api;")
-	mycursor.execute("""CREATE TABLE IF NOT EXISTS index_price (
-							id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
-							timestamp TIMESTAMP, 
-							index_price FLOAT(20,7),
-							mean FLOAT(10,3),
-							sigma FLOAT(10,3));""")
+	dbHelper = DbHelper()
+	sql_strs = ["CREATE DATABASE IF NOT EXISTS exchange_api;", "USE exchange_api;", 
+	"""CREATE TABLE IF NOT EXISTS index_price (
+		id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+		timestamp TIMESTAMP, 
+		index_price FLOAT(20,7),
+		mean FLOAT(10,3),
+		sigma FLOAT(10,3));"""]
+	dbHelper.create(sql_strs)
 
 def calculateIndex(calculator):
 	while True:

@@ -1,3 +1,4 @@
+import configs
 import gzip
 import json
 from parser import Parser
@@ -8,6 +9,12 @@ class HuobiParser(Parser):
 	# override function
 	def getUrl(self):
 		return "wss://api.huobi.pro/ws"
+
+	def getWeight(self):
+		if configs.WEIGHT_STRATEGY == "equal":
+			return None
+		else:
+			return configs.WEIGHTS["huobi"]
 
 	# override function
 	def convertRequest(self):

@@ -1,4 +1,5 @@
 import base64
+import configs
 import datetime
 import dateutil.parser as dp
 import hmac
@@ -12,6 +13,12 @@ class OkParser(Parser):
 	# override function
 	def getUrl(self):
 		return "wss://real.okex.com:8443/ws/v3"
+
+	def getWeight(self):
+		if configs.WEIGHT_STRATEGY == "equal":
+			return None
+		else:
+			return configs.WEIGHTS["ok"]
 
 	# override function
 	def convertRequest(self):
