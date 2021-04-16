@@ -69,8 +69,7 @@ class Calculator():
 					self.spot_prices.append((parser.spot_price.price)*1.0000 * parser.getWeight())
 
 		current_price = sum(self.spot_prices)
-		index, sigma, mean, valid = self.filter(current_price)
-		return (index, sigma, mean, valid)
+		return self.filter(current_price)
 
 	def saveToDb(self, result):
 		sql_str = "INSERT INTO index_price (timestamp, index_price, sigma, mean, valid) VALUES (%s, %s, %s, %s, %s)"
