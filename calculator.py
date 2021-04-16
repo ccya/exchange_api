@@ -18,12 +18,11 @@ class Calculator():
 		self.last_sigma = None
 		self.last_mean = None
 		self.spot_prices = None
-		# past prices used to filter noise. ordered by time desc.
+		# past prices used to filter noise. ordered by time in desc order.
 		self.past_price = [] 
 		self.prod_mode = True
 		self.dbHelper = DbHelper()
 
-# Put result in parser field, not as return type. So that connection can be remain open
 	def fetchSpotPrice(self, loop):
 		asyncio.set_event_loop(loop)
 		for parser in self.parsers:
